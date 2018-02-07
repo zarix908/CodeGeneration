@@ -1,0 +1,92 @@
+﻿{
+	"$id":"1",
+	"StatOrDyn":1,
+	"Constructors":
+	[
+		
+	]
+	,
+	"Methods":
+	[
+		
+		{
+			"$id":"2",
+			"MethodName":"Add",
+			"StaticOrDynamic":1,
+			"OutputType":"string",
+			"InputTypes":
+			[
+				"string",
+				"int"
+			]
+			
+		}
+		
+	]
+	,
+	"InnerClasses":
+	[
+		
+	]
+	,
+	"AllTypes":
+	{
+		"$id":"3",
+		"int":
+		{
+			"$id":"4",
+			"AllTypes":
+			{
+				"$ref":"3"
+			}
+			,
+			"RealType":"System.Int32,
+			 mscorlib,
+			 Version=4.0.0.0,
+			 Culture=neutral,
+			 PublicKeyToken=b77a5c561934e089",
+			"TypeName":"int"
+		}
+		,
+		"double":
+		{
+			"$id":"5",
+			"AllTypes":
+			{
+				"$ref":"3"
+			}
+			,
+			"RealType":"System.Double,
+			 mscorlib,
+			 Version=4.0.0.0,
+			 Culture=neutral,
+			 PublicKeyToken=b77a5c561934e089",
+			"TypeName":"double"
+		}
+		,
+		"string":
+		{
+			"$id":"6",
+			"AllTypes":
+			{
+				"$ref":"3"
+			}
+			,
+			"RealType":"System.String,
+			 mscorlib,
+			 Version=4.0.0.0,
+			 Culture=neutral,
+			 PublicKeyToken=b77a5c561934e089",
+			"TypeName":"string"
+		}
+		,
+		"MyClass":
+		{
+			"$ref":"1"
+		}
+		
+	}
+	,
+	"RealType":null,
+	"TypeName":"MyClass"
+}

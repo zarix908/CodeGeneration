@@ -1,0 +1,25 @@
+[
+{
+	"self":{
+		"name":"class",
+		"type":"class"
+		"modifiers":["public"]
+		},
+
+	"members":{
+		"methodName":[
+			"self":{
+				"type":"method",
+				"static modifiers" //??
+				"access modifiers":["public"], //??
+				"parameters":[
+					{"firstArg":"int"},
+					{"secondArg":"string"}
+				]
+			},
+		]
+	}
+}
+]
+
+//сохранение структуры

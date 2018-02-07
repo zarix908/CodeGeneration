@@ -1,0 +1,10 @@
+c:\users\user\documents\visual studio 2017\Projects\CecilGen\CecilGen\bin\Debug\CecilGen.exe.config
+c:\users\user\documents\visual studio 2017\Projects\CecilGen\CecilGen\bin\Debug\CecilGen.exe
+c:\users\user\documents\visual studio 2017\Projects\CecilGen\CecilGen\bin\Debug\CecilGen.pdb
+c:\users\user\documents\visual studio 2017\Projects\CecilGen\CecilGen\bin\Debug\Mono.Cecil.dll
+c:\users\user\documents\visual studio 2017\Projects\CecilGen\CecilGen\bin\Debug\Mono.Cecil.Mdb.dll
+c:\users\user\documents\visual studio 2017\Projects\CecilGen\CecilGen\bin\Debug\Mono.Cecil.Pdb.dll
+c:\users\user\documents\visual studio 2017\Projects\CecilGen\CecilGen\bin\Debug\Mono.Cecil.Rocks.dll
+c:\users\user\documents\visual studio 2017\Projects\CecilGen\CecilGen\obj\Debug\CecilGen.csprojResolveAssemblyReference.cache
+c:\users\user\documents\visual studio 2017\Projects\CecilGen\CecilGen\obj\Debug\CecilGen.exe
+c:\users\user\documents\visual studio 2017\Projects\CecilGen\CecilGen\obj\Debug\CecilGen.pdb
