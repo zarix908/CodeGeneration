@@ -1,4 +1,4 @@
-﻿{
+﻿	{
 	"$id":"1",
 	"StatOrDyn":1,
 	"Constructors":
