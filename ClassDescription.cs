@@ -1,22 +1,58 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 
-namespace GenerateCode
+namespace DSL
 {
-    public class ClassDescription : ITypeDescription
+    public class ClassDescription : Description
     {
-        public StaticOrDynamic StatOrDyn;
+        public string PackageName { get; private set; }
+        public string FullName { get; private set; }
+        public List<FieldDescription> Fields { get; }
+        public List<MethodDescription> Methods { get; }
+        public List<ClassDescription> Dependencies { get; }
+        public List<ClassDescription> NestedClasses { get; }
+        public readonly bool IsNested;
 
-        public ClassDescription(string name)
+        public ClassDescription(
+            string fullName,
+            List<Modifier> modifiers,
+            List<FieldDescription> fields,
+            List<MethodDescription> methods,
+            List<ClassDescription> dependencies,
+            List<ClassDescription> nestedClasses,
+            bool isNested)
         {
-            TypeName = name;
-            Constructors = new List<ConstructorDescription>();
-            Methods = new List<MethodDescription>();
-            InnerClasses = new List<ClassDescription>();
+            Modifiers = modifiers;
+            Fields = fields;
+            Methods = methods;
+            Dependencies = dependencies;
+            IsNested = isNested;
+            NestedClasses = nestedClasses;
+            Parse(fullName);
         }
 
-        public List<ConstructorDescription> Constructors;
-        public List<MethodDescription> Methods;
+        private void Parse(string fullName)
+        {
+            const char nestedClassesSeparator = '$';
+            const char javaPathSeparator = '.';
 
-        public List<ClassDescription> InnerClasses;
+            FullName = fullName.Replace(nestedClassesSeparator, javaPathSeparator);
+
+            if (IsNested)
+            {
+                var splitedFullName = fullName.Split(nestedClassesSeparator);
+                Name = splitedFullName[splitedFullName.Length - 1];
+            }
+            else
+            {
+                var splitedFullName = fullName.Split(new []{javaPathSeparator}, 
+                    StringSplitOptions.RemoveEmptyEntries);
+                var splitedNameSize = splitedFullName.Length;
+
+                Name = splitedFullName[splitedNameSize - 1];
+                PackageName = string.Join(".", splitedFullName.Take(splitedNameSize - 1).ToArray());
+            }
+        }
     }
 }

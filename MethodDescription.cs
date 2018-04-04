@@ -1,24 +1,19 @@
-﻿namespace GenerateCode
+﻿using System.Collections.Generic;
+
+namespace DSL
 {
-    public class ConstructorDescription
+    public class MethodDescription : Description
     {
-        public string MethodName = "Constructor";
-        public StaticOrDynamic StaticOrDynamic = StaticOrDynamic.Dynamic;
+        public List<ParametrDescription> ParametersDescription { get; }
+        public string ReturnType { get; }
 
-        public string[] InputTypes;
-    }
-
-    public class MethodDescription
-    {
-        public MethodDescription(string name)
+        public MethodDescription(string name, List<Modifier> modifiers,
+            List<ParametrDescription> parametersDescription, string returnType)
         {
-            MethodName = name;
+            Name = name;
+            Modifiers = modifiers;
+            ParametersDescription = parametersDescription;
+            ReturnType = returnType;
         }
-
-        public string MethodName;
-        public StaticOrDynamic StaticOrDynamic;
-
-        public string OutputType;
-        public string[] InputTypes;
     }
 }
