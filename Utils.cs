@@ -6,33 +6,33 @@ namespace CodeGenerator
 {
     public static class Utils
     {
-        public static SyntaxKind ModifierToSyntaxKind(Modifier modifier)
+        public static SyntaxKind ModifierDescriptionToSyntaxKind(ModifierDescription modifierDescription)
         {
             SyntaxKind result;
 
-            switch (modifier)
+            switch (modifierDescription)
             {
-                case Modifier.Public:
+                case ModifierDescription.PUBLIC:
                 {
                     result = SyntaxKind.PublicKeyword;
                     break;
                 }
-                case Modifier.Abstract:
+                case ModifierDescription.ABSTRACT:
                 {
                     result = SyntaxKind.AbstractKeyword;
                     break;
                 }
-                case Modifier.Final:
+                case ModifierDescription.FINAL:
                 {
                     result = SyntaxKind.SealedKeyword;
                     break;
                 }
-                case Modifier.Protected:
+                case ModifierDescription.PROTECTED:
                 {
                     result = SyntaxKind.ProtectedKeyword;
                     break;
                 }
-                case Modifier.Static:
+                case ModifierDescription.STATIC:
                 {
                     result = SyntaxKind.StaticKeyword;
                     break;

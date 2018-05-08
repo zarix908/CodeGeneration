@@ -6,22 +6,25 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace CodeGenerator
 {
-    public class ClassProxyGenerator
+    public class ClassProxyGenerator : IGenerator<ClassDeclarationSyntax, ClassDescription>
     {
+        private readonly MethodBodyGetter methodBodyGetter;
+
+        public ClassProxyGenerator(MethodBodyGetter methodBodyGetter) => this.methodBodyGetter = methodBodyGetter;
+
         public ClassDeclarationSyntax Generate(ClassDescription classDescription)
         {
-            var classDeclaration = SyntaxFactory.ClassDeclaration(classDescription.Name);
-            foreach (var modifierDescription in classDescription.Modifiers)
-            {
-                var syntaxKind = Utils.ModifierToSyntaxKind(modifierDescription);
-                var modifier = SyntaxFactory.Token(syntaxKind);
-                classDeclaration = classDeclaration.AddModifiers(modifier);
-            }
+            var modifiers = classDescription.ModifiersDescriptions
+                .Select(Utils.ModifierDescriptionToSyntaxKind)
+                .Select(SyntaxFactory.Token);
 
-            var publicFields = GenerateFields(classDescription.Fields
-                .Where(el => el.Modifiers.Contains(Modifier.Public)));
-            var publicMethods = GenerateMethods(classDescription.Methods
-                .Where(el => el.Modifiers.Contains(Modifier.Public)));
+            var classDeclaration = SyntaxFactory.ClassDeclaration(classDescription.Name)
+                .AddModifiers(modifiers.ToArray());
+
+            var publicFields = GenerateFields(classDescription.FieldsDescriptions
+                .Where(el => el.ModifiersDescriptions.Contains(ModifierDescription.PUBLIC)));
+            var publicMethods = GenerateMethods(classDescription.MethodsDescriptions
+                .Where(el => el.ModifiersDescriptions.Contains(ModifierDescription.PUBLIC)));
 
             classDeclaration = classDeclaration
                 .AddMembers(publicFields.ToArray())
@@ -33,16 +36,20 @@ namespace CodeGenerator
         private IEnumerable<FieldDeclarationSyntax> GenerateFields(IEnumerable<FieldDescription> fieldDescriptions)
         {
             foreach (var fieldDescription in fieldDescriptions)
-            {
+            { 
                 var fieldType = SyntaxFactory.ParseTypeName(fieldDescription.Type);
                 var fieldName = SyntaxFactory.ParseToken(fieldDescription.Name);
 
                 var variableDeclaration = SyntaxFactory.VariableDeclaration(fieldType)
                     .AddVariables(SyntaxFactory.VariableDeclarator(fieldName));
-                var field = SyntaxFactory.FieldDeclaration(variableDeclaration)
-                    .AddModifiers(SyntaxFactory.Token(SyntaxKind.PrivateKeyword));
+                var field = SyntaxFactory.FieldDeclaration(variableDeclaration);
 
-                yield return field;
+                var modifiers = fieldDescription.ModifiersDescriptions
+                    .Select(Utils.ModifierDescriptionToSyntaxKind)
+                    .Select(SyntaxFactory.Token)
+                    .ToArray();
+
+                yield return field.AddModifiers(modifiers);
             }
         }
 
@@ -50,29 +57,32 @@ namespace CodeGenerator
         {
             foreach (var methodDescription in methodDescriptions)
             {
+                var modifiers = methodDescription.ModifiersDescriptions
+                    .Select(Utils.ModifierDescriptionToSyntaxKind)
+                    .Select(SyntaxFactory.Token);
+
                 var returnType = SyntaxFactory.ParseTypeName(methodDescription.ReturnType);
-                var methodDeclaration = SyntaxFactory.MethodDeclaration(returnType, methodDescription.Name);
 
-                foreach (var modifierDescription in methodDescription.Modifiers)
-                {
-                    var syntaxKind = Utils.ModifierToSyntaxKind(modifierDescription);
-                    var modifier = SyntaxFactory.Token(syntaxKind);
-                    methodDeclaration = methodDeclaration.AddModifiers(modifier);
-                }
+                if (methodDescription.ReturnType == "void")
+                    returnType = SyntaxFactory.PredefinedType(SyntaxFactory.Token(SyntaxKind.VoidKeyword));
 
-                foreach (var parameterDescription in methodDescription.ParametersDescription)
-                {
-                    var name = SyntaxFactory.Identifier(parameterDescription.Name);
-                    var type = SyntaxFactory.ParseTypeName(parameterDescription.Type);
-                    
-                    var parameter = SyntaxFactory.Parameter(name)
-                        .WithType(type);
+                var methodDeclaration = SyntaxFactory
+                    .MethodDeclaration(returnType,
+                        methodDescription.Name)
+                    .AddModifiers(modifiers.ToArray());
 
-                    methodDeclaration = methodDeclaration.AddParameterListParameters(parameter);
-                }
+                var parameters = methodDescription.ParametersDescription
+                    .Select(el => new
+                        {
+                            Name = SyntaxFactory.Identifier(el.Name),
+                            Type = SyntaxFactory.ParseTypeName(el.Type)
+                        })
+                    .Select(el => SyntaxFactory.Parameter(el.Name).WithType(el.Type));
 
-                yield return methodDeclaration.WithBody(
-                    SyntaxFactory.Block());
+                methodDeclaration = methodDeclaration
+                    .AddParameterListParameters(parameters.ToArray());
+
+                yield return methodDeclaration.WithBody(methodBodyGetter.GetBodyFor(methodDeclaration));
             }
         }
     }

@@ -7,9 +7,9 @@ namespace CodeGenerator
         static void Main()
         {
             var description = new DescriptionFactory().Generate();
-            var proxy = new LibraryProxyGenerator(new ClassProxyGenerator()).Generate(description);
+            var classGenerator = new ClassProxyGenerator(new MethodBodyGetter());
+            var proxy = new LibraryProxyGenerator(classGenerator).Generate(description);
             new Compiller().Compile(proxy);
-            Console.ReadKey();
         }
     }
 }

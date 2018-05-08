@@ -6,11 +6,11 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace CodeGenerator
 {
-    public class LibraryProxyGenerator
+    public class LibraryProxyGenerator : IGenerator<Proxy, LibraryDescription>
     {
-        private readonly ClassProxyGenerator classProxyGenerator;
+        private readonly IGenerator<ClassDeclarationSyntax, ClassDescription> classProxyGenerator;
 
-        public LibraryProxyGenerator(ClassProxyGenerator classProxyGenerator)
+        public LibraryProxyGenerator(IGenerator<ClassDeclarationSyntax, ClassDescription> classProxyGenerator)
         {
             this.classProxyGenerator = classProxyGenerator;
         }
@@ -18,7 +18,7 @@ namespace CodeGenerator
         public Proxy Generate(LibraryDescription libraryDescription)
         {
             var toProxyClasses = new Queue<ClassDescription>();
-            var proxiedClasses = new HashSet<string>();
+            var proxyClassesNames = new HashSet<string>();
             var namespaceUnits = new Dictionary<string, NamespaceUnit>();
 
             toProxyClasses.EnqueueRange(libraryDescription.Classes);
@@ -26,16 +26,15 @@ namespace CodeGenerator
             while (toProxyClasses.Count != 0)
             {
                 var classDescription = toProxyClasses.Dequeue();
-                var toProxyDependencies = classDescription.Dependencies
-                    .Where(el => el.PackageName != classDescription.PackageName)
-                    .Where(el => !proxiedClasses.Contains(el.FullName));
+                var toProxyDependencies = classDescription.DependenciesDescriptions
+                    .Where(el => !proxyClassesNames.Contains(el.PackageName + el.Name));
 
                 toProxyClasses.EnqueueRange(toProxyDependencies);
-                proxiedClasses.Add(classDescription.FullName);
+                proxyClassesNames.Add(classDescription.PackageName + classDescription.Name);
 
                 var classProxy = classProxyGenerator.Generate(classDescription);
 
-                var nestedClassProxies = classDescription.NestedClasses
+                var nestedClassProxies = classDescription.NestedClassesDescriptions
                     .Select(el => classProxyGenerator.Generate(el))
                     .ToArray();
 
@@ -43,23 +42,7 @@ namespace CodeGenerator
                 AddClassToNamespaceUnits(classProxy, classDescription, namespaceUnits);
             }
 
-            return new Proxy(CollectCompilationUnitsFrom(namespaceUnits));
-        }
-
-        private IEnumerable<CompilationUnitSyntax> CollectCompilationUnitsFrom(
-            Dictionary<string, NamespaceUnit> namespaceUnits)
-        {
-            foreach (var namespaceUnit in namespaceUnits.Values)
-            {
-                var namespaceDeclaration = namespaceUnit.NamespaceDeclaration;
-                var usings = SyntaxFactory.List(namespaceUnit.Usings);
-
-                var compilationUnit = SyntaxFactory.CompilationUnit()
-                    .AddMembers(namespaceDeclaration)
-                    .WithUsings(usings);
-
-                yield return compilationUnit;
-            }
+            return new Proxy(namespaceUnits.Values);
         }
 
         private void AddClassToNamespaceUnits(
@@ -77,8 +60,9 @@ namespace CodeGenerator
 
             namespaceUnits[packageName].NamespaceDeclaration = newDeclaration;
 
-            var dependenciesUsings = classDescription.Dependencies
+            var dependenciesUsings = classDescription.DependenciesDescriptions
                 .Select(el => el.PackageName)
+                .Where(el => el != classDescription.PackageName)
                 .Select(el => SyntaxFactory.UsingDirective(SyntaxFactory.IdentifierName(el)));
 
             namespaceUnits[packageName].Usings.AddRange(dependenciesUsings);
